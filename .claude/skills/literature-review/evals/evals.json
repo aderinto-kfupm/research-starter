@@ -1,0 +1,23 @@
+{
+  "skill_name": "literature-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Do a literature review on the papers in my PAPERS folder at C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS — I want a thematic review focused on multi-robot coordination and soft computing methods. Save it as literature_review.md in that folder.",
+      "expected_output": "A structured markdown literature review with: introduction, summary table of all papers, thematic sections (grouped by method/topic), research trends, gaps, comparative analysis, and references. All papers in the folder should appear in the summary table.",
+      "files": ["C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS/"]
+    },
+    {
+      "id": 2,
+      "prompt": "I have a bunch of papers on UAV-UGV systems in my PAPERS folder (C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS). Can you write a chronological literature review to show how the research has evolved over time?",
+      "expected_output": "A chronological literature review showing the evolution of UAV-UGV research, grouped by time period or publication year, with a clear narrative arc showing how ideas developed. Includes intro, chronological sections, trend analysis, gaps, and references.",
+      "files": ["C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS/"]
+    },
+    {
+      "id": 3,
+      "prompt": "/literature-review — papers in C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS. Focus on the optimization algorithms used (PSO, ACO, game theory etc.) and compare their approaches.",
+      "expected_output": "A methodological literature review comparing optimization algorithms across papers. Includes a strong comparative analysis table contrasting approaches, performance metrics, and applicability. Research gaps should specifically name which optimization directions are underexplored.",
+      "files": ["C:/Users/hexal/Documents/KFUPM Systems and Control/PhD Research/ugv-soft-computing/PAPERS/"]
+    }
+  ]
+}

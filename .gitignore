@@ -1,0 +1,42 @@
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.run.xml
+*.bcf
+main.pdf
+
+# Data, results, literature PDFs (keep folders)
+data/raw/*
+data/processed/*
+results/*
+papers/*
+!**/.gitkeep
+
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# MATLAB / Simulink
+slprj/
+*.slxc
+*.asv
+*.autosave
+*.mexw64
+*.mexa64
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/settings.local.json

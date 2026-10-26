@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "<Paper Title>"
+type: software   # CFF allows only software|dataset; this cites the code+paper repo. Cite the paper itself via preferred-citation once published.
+authors:
+  - family-names: "Aderinto"
+    given-names: "Abdurrahman Adebisi"
+    affiliation: "King Fahd University of Petroleum and Minerals"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 0.1.0
+date-released: 2026-01-01
+license: MIT
+repository-code: "https://github.com/<user>/<repo>"
+# doi: "10.5281/zenodo.0000000"   # add after archiving a release on Zenodo

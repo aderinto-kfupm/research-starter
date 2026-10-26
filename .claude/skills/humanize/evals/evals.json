@@ -1,0 +1,23 @@
+{
+  "skill_name": "humanize",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Humanize this IEEE paper introduction section:\n\n\"In recent years, unmanned ground vehicles (UGVs) have garnered significant attention in the field of robotics and autonomous systems. Furthermore, the integration of soft computing techniques, such as fuzzy logic and neural networks, has enabled more robust and adaptive control strategies. Additionally, particle swarm optimization (PSO) has emerged as a powerful tool for parameter tuning. It is worth noting that existing methods often fail to address the dynamic nature of real-world environments. Therefore, this paper proposes a novel fuzzy PID controller optimized via PSO to address these limitations. The proposed approach demonstrates superior performance compared to conventional methods. The remainder of this paper is organized as follows.\"",
+      "expected_output": "Rewritten introduction with: no 'Furthermore/Moreover/Additionally/It is worth noting' openers, varied sentence lengths (at least one short emphatic sentence), specific claims replacing vague ones, authorial stance present, no 'novel' or 'superior performance' without quantification, same factual content preserved.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "This is from my related work section — make it sound more human while keeping all the citations:\n\n\"Garg et al. [2] proposed a distributed cooperative approach for dynamic target search using particle swarm optimization with limited intercommunication. The authors demonstrated that their method achieves a detection rate of over 80%. However, their approach is validated only in simulation and does not consider heterogeneous robot teams. Similarly, Qiu et al. [3] presented a hybrid method combining game theory and PSO for 3D path planning. While their results show promising performance, the method has not been tested in real-world environments. Notably, none of the above methods address the specific challenge of dynamic task reallocation in GPS-denied environments, which this paper aims to resolve.\"",
+      "expected_output": "Rewritten related work with: all citations [2] and [3] preserved exactly, no 'Similarly/Notably/However' mechanical structure, no 'none of the above methods address' as last sentence, varied paragraph rhythm, specific claims retained (80% detection, game theory+PSO, GPS-denied gap), authorial perspective present.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Humanize these Python code comments — keep all logic, variable names, and structure exactly as-is, only rewrite the comments:\n\n```python\n# This function implements the Particle Swarm Optimization algorithm to find\n# the optimal PID gains that minimize the ITAE cost function.\n# Parameters:\n#   cost_fn: The cost function to be minimized\n#   lb: Lower bounds for the search space\n#   ub: Upper bounds for the search space\ndef run_pso(cost_fn, lb, ub):\n    # Initialize all particle positions randomly within the specified bounds\n    pos = lb + np.random.rand(30, len(lb)) * (ub - lb)\n    # Initialize all particle velocities to zero\n    vel = np.zeros_like(pos)\n    # Initialize personal best positions to initial positions\n    pbest = pos.copy()\n    # Initialize personal best values by evaluating cost function\n    pbest_val = np.array([cost_fn(p) for p in pos])\n```",
+      "expected_output": "Rewritten with: shorter pragmatic comments explaining WHY not WHAT, varied comment density (some lines without comments), casual tone, possibly a note about a design decision or tradeoff, all code logic/variable names/structure identical to input.",
+      "files": []
+    }
+  ]
+}

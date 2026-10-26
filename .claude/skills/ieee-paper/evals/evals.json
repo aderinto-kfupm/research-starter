@@ -1,0 +1,23 @@
+{
+  "skill_name": "ieee-paper",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Start my IEEE conference paper. The topic is a PSO-tuned fuzzy PID controller for UGV speed control. I'm the sole author — my name is [Researcher], Dept. Systems & Control Engineering, KFUPM, Dhahran, Saudi Arabia. There's no main.tex yet. Also check if there's a literature review file in the review/ folder and use it for the Related Work section and references.",
+      "expected_output": "Creates main.tex from full IEEEtran template with title, author block, abstract placeholder, index terms, and all 6 sections scaffolded. Creates main.bbl. Checks for review/ver*.tex — if found, imports references into main.bbl and drafts Related Work from the lit review themes. Uses \\input{main.bbl} in main.tex. No template placeholder text remains in title/author/abstract.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write the Methodology section for my IEEE paper on a Mamdani fuzzy controller for UGV speed regulation. The system is a second-order plant. The fuzzy controller has two inputs (error e and derivative of error de/dt) and one output (control signal u). Include the state-space model equation, the ITAE cost function, and a description of the membership functions. Add these to main.tex if it exists.",
+      "expected_output": "Writes a complete Section III (or appropriately numbered section) in IEEE prose style. Includes: state-space equations with \\eqref labels using {align} (not eqnarray), ITAE integral equation, description of MFs and rule base. All equations labeled and cross-referenced with \\eqref. New \\bibitem entries added to main.bbl for any new citations. No hardcoded equation numbers.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Add the References section to my paper. I need to cite these papers: (1) Garg et al. 2022 - PSO with limited intercommunication, Arabian J Science Engineering; (2) Qiu et al. 2025 - Game theory + PSO 3D path planning, J Supercomputing; (3) Ma et al. 2025 - AD-GNN task allocation UAV-UGV, IEEE Trans Intelligent Vehicles vol 10 no 5 pp 3573-3589. Format them correctly in main.bbl and make sure main.tex uses \\input{main.bbl}.",
+      "expected_output": "Adds 3 properly formatted \\bibitem entries to main.bbl in IEEEtran style: journal and conference formats correct, paper titles with only first word capitalized, acronyms in braces ({PSO}, {UAV}, {UGV}), ~ between initials and surnames, -- for page ranges. main.tex has \\input{main.bbl} not \\bibliography{}. Citation keys follow firstauthorYYYY convention.",
+      "files": []
+    }
+  ]
+}

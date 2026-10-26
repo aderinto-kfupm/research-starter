@@ -1,0 +1,23 @@
+{
+  "skill_name": "matlab-simulink",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a research-grade MATLAB + Simulink setup for a fuzzy PID speed controller for a UGV. The UGV has mass 8 kg, max speed 2.5 m/s, and I want to compare a plain PID against a fuzzy-tuned PID. Generate the Simulink block diagram image first, then build the model programmatically. I need publication-quality step response plots and a CSV of the performance metrics (rise time, overshoot, settling time, ITAE).",
+      "expected_output": "Full project folder structure with params.m, fuzzy controller FIS, build_model.m that programmatically creates the .slx, analyze.m computing all 4 metrics, plot_results.m producing publication-quality figures saved as PNG+PDF, and main.m tying it together. A /nano-banana call should be made to generate the block diagram before the Simulink model is built.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need MATLAB code to implement and analyze a PSO-tuned PID controller for a second-order plant with transfer function 1/(s^2 + 2s + 1). The PSO should minimize ITAE. No Simulink needed — just pure MATLAB scripts. Give me the full project structure, organized code, and plots showing convergence curve and the final step response.",
+      "expected_output": "Project structure with params.m (PSO and plant parameters), run_pso.m using the PSO template, cost function using ITAE, simulation using lsim or ode45, plot_results.m with convergence curve and step response. No Simulink or nano-banana call needed for this one.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "/matlab-simulink — simulate a UGV path following system in Simulink. The UGV kinematics are unicycle model (x_dot = v*cos(theta), y_dot = v*sin(theta), theta_dot = omega). Use a pure pursuit controller. I want to see the XY trajectory plot, heading error over time, and cross-track error. Generate the block diagram with nano-banana first.",
+      "expected_output": "Project with unicycle kinematic model in state-space form, pure pursuit controller .m, build_model.m creating a Simulink model with MATLAB Function blocks for kinematics and controller, nano-banana called to generate a system block diagram, plot_results.m showing XY trajectory + two time-series plots. All files properly structured and commented.",
+      "files": []
+    }
+  ]
+}

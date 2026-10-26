@@ -1,0 +1,17 @@
+name: matlab
+on: [push, pull_request]
+# Free MATLAB on GitHub-hosted runners works for PUBLIC repos only.
+# Private repo: set up MathWorks batch licensing and pass the token (see setup-matlab docs),
+# or switch `runs-on` to a self-hosted runner that has MATLAB installed.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v2
+        with:
+          products: Control_System_Toolbox   # list every toolbox the paper uses
+      - uses: matlab-actions/run-tests@v2
+        with:
+          source-folder: src/matlab
+          select-by-folder: tests/matlab
