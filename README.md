@@ -34,7 +34,7 @@ Use one of the two toolchains per paper and delete the other (see [docs/environm
 | `data/raw/`, `data/processed/` | Inputs. Raw is read-only; large files stay out of git (see [data/README.md](data/README.md)). |
 | `results/` | Generated numeric outputs (`.mat`, `.csv`). Gitignored. |
 | `papers/` | PDFs of related work for `/literature-review`. Gitignored. |
-| `review/` | Literature-review output (`ver1.tex`, `ver2.tex`, ...) from `/literature-review`. |
+| `review/` | Literature-review output (`ver1.tex`, `ver2.tex`, ...) from `/literature-review`; verified-DOI candidate lists from `/paper-finder` in `review/consensus/`. |
 | `reviews/` | In-house peer-review reports from `/academic-paper-reviewer`. See [reviews/README.md](reviews/README.md). |
 | `docs/` | Onboarding, methodology, reproducibility, the Claude workflow, paper plan, and submission checklist. |
 | `.claude/skills/` | Project skills (writing, review, MATLAB). |

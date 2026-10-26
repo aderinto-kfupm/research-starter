@@ -5,6 +5,7 @@ Stages, the skill that drives each, and the artifact it leaves behind. Gate each
 | # | Stage | Command | Artifact |
 |---|---|---|---|
 | 1 | Plan paper (type, venue, outline) | `/academic-paper` (plan / outline mode) | `docs/plan.md` (save the outline) |
+| 1b | Find papers, get verified DOIs | `/paper-finder` (Consensus, falls back to OpenAlex/Semantic Scholar/Crossref) | `review/consensus/*.md` with a download list; you download the PDFs into `papers/` |
 | 2 | Literature survey | drop PDFs in `papers/`, run `/literature-review` | `review/ver{n}.tex` |
 | 3 | Build the model/simulation | `/matlab-simulink` or Python in `src/python` | code in `src/`, figures in `figures/` |
 | 4 | Draft | `/ieee-paper` per section (uses `review/ver*.tex` for Related Work) | `writeup/main.tex`, `writeup/references.bib` |

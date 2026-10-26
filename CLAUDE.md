@@ -14,6 +14,7 @@ This repo holds one research paper plus the code that produces its results. Read
 | Task | Skill | Output location |
 |---|---|---|
 | Write/edit the paper | `/ieee-paper` (or `/academic-paper` for planning, abstract, citation-check, revision, rebuttal) | `writeup/main.tex`, `writeup/references.bib` |
+| Find / verify / download papers | `/paper-finder` (Consensus + Crossref + OpenAlex/Unpaywall) | candidates in `review/consensus/`, PDFs in `papers/`, verified entries to `writeup/references.bib` |
 | Survey related work | `/literature-review` over `papers/` | `review/ver{n}.tex` (never overwrite) |
 | Simulation / analysis (MATLAB) | `/matlab-simulink` | `src/matlab/`, models in `src/matlab/models/` |
 | In-house peer review | `/academic-paper-reviewer` | `reviews/YYYY-MM-DD_<mode>/` (see `reviews/README.md`) |
