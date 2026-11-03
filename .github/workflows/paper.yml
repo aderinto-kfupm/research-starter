@@ -13,3 +13,10 @@ jobs:
         with:
           name: main.pdf
           path: writeup/main.pdf
+      - name: Publish PDF to hub
+        if: github.ref == 'refs/heads/main'
+        env:
+          HUB_URL: ${{ secrets.HUB_URL }}
+          HUB_EMAIL: ${{ secrets.HUB_EMAIL }}
+          HUB_PASSWORD: ${{ secrets.HUB_PASSWORD }}
+        run: hub/scripts/publish.sh paper writeup/main.pdf main.pdf

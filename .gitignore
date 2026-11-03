@@ -40,3 +40,13 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/settings.local.json
+
+cred.txt
+# Secrets
+cred.txt
+*.env
+!*.env.example
+
+# Hub local data
+hub/pb_data/
+hub/.env
