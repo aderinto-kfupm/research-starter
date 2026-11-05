@@ -170,7 +170,7 @@ async function viewBoard(main) {
       col.append(c);
     }
     col.addEventListener("dragover", (e) => { e.preventDefault(); col.classList.add("over"); });
-    col.addEventListener("dragleave", () => col.classList.remove("over"));
+    col.addEventListener("dragleave", (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove("over"); });
     col.addEventListener("drop", async (e) => { e.preventDefault(); col.classList.remove("over"); if (dragId) { await place(st, null); render(); } });
     return col;
   }));

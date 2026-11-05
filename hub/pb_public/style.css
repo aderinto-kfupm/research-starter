@@ -48,8 +48,8 @@ label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px
 .err { color: var(--danger); font-size: 13px; min-height: 20px; margin-top: 8px; }
 
 /* board */
-.board { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 16px; align-items: start; }
-.col { background: var(--soft); border-radius: 6px; padding: 10px; min-height: 140px; }
+.board { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 16px; align-items: stretch; }
+.col { background: var(--soft); border-radius: 6px; padding: 10px; min-height: 60vh; }
 .col.over { outline: 1px dashed var(--accent); }
 .col h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 2px 4px 10px; display: flex; justify-content: space-between; }
 .card { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
