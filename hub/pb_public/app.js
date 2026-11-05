@@ -28,7 +28,7 @@ const field = (label, input) => h("div", { class: "field" }, h("label", {}, labe
 
 // ---------- shell ----------
 const routes = { board: viewBoard, roadmap: viewRoadmap, log: viewLog, paper: viewPaper, people: viewPeople };
-let cur = null, timer = null, dragging = false;
+let cur = null, timer = null, dragging = false, refreshBoard = null;
 
 async function render() {
   if (!pb.authStore.isValid) return viewLogin();
@@ -44,13 +44,17 @@ async function render() {
         h("button", { class: "btn link", onclick: () => { pb.authStore.clear(); render(); } }, "Sign out"))),
     main);
   cur = key;
+  refreshBoard = null;
   try { await routes[key](main); } catch (e) { main.append(h("p", { class: "err" }, e.message)); }
 }
 window.addEventListener("hashchange", render);
 
 // live refresh when somebody else edits (not while a dialog is open)
 function live() {
-  const kick = () => { clearTimeout(timer); timer = setTimeout(() => { if (!dragging && !document.querySelector("dialog[open]") && /board|roadmap|log/.test(cur)) render(); }, 300); };
+  const kick = () => { clearTimeout(timer); timer = setTimeout(() => {
+    if (dragging || document.querySelector("dialog[open]") || document.querySelector("main textarea:focus,main input:focus")) return;
+    if (cur === "board" && refreshBoard) refreshBoard().catch(() => {}); else if (/roadmap|log/.test(cur)) render();
+  }, 300); };
   for (const c of ["tasks", "logs"]) pb.collection(c).subscribe("*", kick).catch(() => {});
 }
 
@@ -135,47 +139,126 @@ async function taskDialog(t) {
 }
 
 // ---------- board ----------
+const toast = (msg) => { const t = h("div", { class: "toast" }, msg); document.body.append(t); setTimeout(() => t.remove(), 3500); };
+const short = (s) => new Date(ms(s)).toLocaleDateString(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
+const P = (t) => t.pos || 0, byPos = (a, b) => P(a) - P(b);
+
 async function viewBoard(main) {
-  const tasks = await pb.collection("tasks").getFullList({ sort: "pos,created" });
-  let dragId = null;
-  // pos is a float: insert between neighbours, or append when beforeId is null
-  const place = async (status, beforeId) => {
-    const col = tasks.filter((t) => t.status === status && t.id !== dragId);
-    const i = beforeId ? col.findIndex((t) => t.id === beforeId) : -1;
-    const last = col.at(-1)?.pos || 0;
-    const pos = i < 0 ? last + 1 : i === 0 ? (col[0].pos || 0) - 1 : ((col[i - 1].pos || 0) + (col[i].pos || 0)) / 2;
-    await pb.collection("tasks").update(dragId, { status, pos });
+  const load = () => pb.collection("tasks").getFullList({ sort: "pos,created" });
+  let tasks = await load(), q = "", adding = null, drawing = false, suppress = false;
+  const edit = canEdit();
+  const board = h("div", { class: "board" });
+  refreshBoard = async () => { tasks = await load(); draw(); };
+
+  // pos is a float: land between neighbours, or at the end when beforeId is empty
+  const moveTask = async (t, status, beforeId) => {
+    const col = tasks.filter((x) => x.status === status && x.id !== t.id).sort(byPos);
+    const i = beforeId ? col.findIndex((x) => x.id === beforeId) : -1;
+    const pos = i < 0 ? (col.length ? P(col.at(-1)) : 0) + 1 : i === 0 ? P(col[0]) - 1 : (P(col[i - 1]) + P(col[i])) / 2;
+    Object.assign(t, { status, pos });
+    draw();
+    try { await pb.collection("tasks").update(t.id, { status, pos }); }
+    catch { toast("Could not save that move."); refreshBoard(); }
   };
-  const board = h("div", { class: "board" }, COLS.map(([st, label]) => {
-    const items = tasks.filter((t) => t.status === st);
-    const col = h("div", { class: "col" }, h("h3", {}, label, h("span", {}, items.length)));
-    if (st === "todo" && canEdit()) {
-      const i = h("input", { class: "add", placeholder: "Add task, press Enter" });
-      i.addEventListener("keydown", async (e) => {
-        if (e.key !== "Enter" || !i.value.trim()) return;
-        await pb.collection("tasks").create({ title: i.value.trim(), status: "todo", pos: Math.max(0, ...tasks.map((t) => t.pos || 0)) + 1 });
-        render();
-      });
-      col.append(i);
-    }
-    for (const t of items) {
-      const late = t.due && st !== "done" && day(t.due) < today();
-      const c = h("div", { class: "card", draggable: canEdit(), onclick: () => taskDialog(t) },
-        t.title,
-        (t.due || t.milestone) && h("div", { class: "meta" }, t.milestone && h("span", {}, t.milestone), t.due && h("span", { class: late ? "late" : "" }, "due " + fmt(t.due))));
-      c.addEventListener("dragstart", (e) => { dragId = t.id; dragging = true; e.dataTransfer.setData("text/plain", t.id); e.dataTransfer.effectAllowed = "move"; c.classList.add("drag"); });
-      c.addEventListener("dragend", () => { dragging = false; c.classList.remove("drag"); });
-      c.addEventListener("dragover", (e) => e.preventDefault());
-      c.addEventListener("drop", async (e) => { e.preventDefault(); e.stopPropagation(); if (dragId && dragId !== t.id) { await place(st, t.id); render(); } });
-      col.append(c);
-    }
-    col.addEventListener("dragover", (e) => { e.preventDefault(); col.classList.add("over"); });
-    col.addEventListener("dragleave", (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove("over"); });
-    col.addEventListener("drop", async (e) => { e.preventDefault(); col.classList.remove("over"); if (dragId) { await place(st, null); render(); } });
-    return col;
-  }));
-  main.append(h("div", { class: "bar" }, h("h2", {}, "Board"),
-    h("span", { class: "muted" }, canEdit() ? "Drag cards between columns. Click a card for details and discussion." : "Click a card for details and discussion.")), board);
+
+  // pointer-based drag (mouse/pen): ghost follows cursor, a line shows the landing spot, Esc cancels
+  const startDrag = (e, c, t) => {
+    if (e.button !== 0 || e.pointerType === "touch") return;
+    const x0 = e.clientX, y0 = e.clientY, r = c.getBoundingClientRect();
+    let ghost = null, esc = false;
+    const ph = h("div", { class: "ph" });
+    const at = (ev) => {
+      const col = document.elementFromPoint(ev.clientX, ev.clientY)?.closest(".col");
+      if (!col) return null;
+      const before = [...col.querySelectorAll(".card:not(.drag)")].find((k) => { const b = k.getBoundingClientRect(); return ev.clientY < b.top + b.height / 2; });
+      return { col, before };
+    };
+    const clear = () => document.querySelectorAll(".col.over").forEach((x) => x.classList.remove("over"));
+    const onMove = (ev) => {
+      if (!ghost) {
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
+        dragging = true;
+        ghost = c.cloneNode(true);
+        ghost.className = "card ghost";
+        ghost.style.width = r.width + "px";
+        document.body.append(ghost);
+        document.body.classList.add("grabbing");
+        c.classList.add("drag");
+      }
+      ghost.style.transform = `translate(${ev.clientX - (x0 - r.left)}px,${ev.clientY - (y0 - r.top)}px) rotate(1.5deg)`;
+      clear();
+      const g = at(ev);
+      if (!g) return ph.remove();
+      g.col.classList.add("over");
+      g.col.querySelector(".cards").insertBefore(ph, g.before || null);
+    };
+    const onKey = (ev) => { if (ev.key === "Escape") { esc = true; onUp(ev); } };
+    const onUp = async (ev) => {
+      removeEventListener("pointermove", onMove); removeEventListener("pointerup", onUp); removeEventListener("keydown", onKey);
+      if (!ghost) return;
+      const g = esc ? null : at(ev);
+      ghost.remove(); ph.remove(); clear(); c.classList.remove("drag");
+      document.body.classList.remove("grabbing");
+      dragging = false; suppress = true; setTimeout(() => (suppress = false));
+      if (g) await moveTask(t, g.col.dataset.st, g.before?.dataset.id);
+    };
+    addEventListener("pointermove", onMove); addEventListener("pointerup", onUp); addEventListener("keydown", onKey);
+  };
+
+  const card = (t) => {
+    const late = t.due && t.status !== "done" && day(t.due) < today();
+    const c = h("div", { class: "card" + (t.status === "done" ? " done" : ""), tabindex: 0, "data-id": t.id,
+      onclick: () => !suppress && taskDialog(t),
+      onkeydown: (e) => { if (e.key === "Enter" && e.target === c) taskDialog(t); } },
+      h("div", { class: "t" }, t.title),
+      (t.milestone || t.due || t.notes) && h("div", { class: "meta" },
+        t.milestone && h("span", { class: "chip" }, t.milestone),
+        t.due && h("span", { class: "chip" + (late ? " late" : "") }, (late ? "Overdue · " : "") + short(t.due)),
+        t.notes && h("span", { class: "chip", title: "Has notes" }, "≡")));
+    if (edit) c.addEventListener("pointerdown", (e) => startDrag(e, c, t));
+    return c;
+  };
+
+  const addBox = (st) => {
+    const i = h("textarea", { class: "add", rows: 2, placeholder: "Task title. Enter to add, Esc to close." });
+    i.addEventListener("keydown", async (e) => {
+      if (e.key === "Escape") { adding = null; return draw(); }
+      if (e.key !== "Enter" || e.shiftKey) return;
+      e.preventDefault();
+      const title = i.value.trim();
+      if (!title) return;
+      i.disabled = true;
+      try {
+        const pos = Math.max(0, ...tasks.filter((x) => x.status === st).map(P)) + 1;
+        tasks.push(await pb.collection("tasks").create({ title, status: st, pos }));
+      } catch { toast("Could not add the task."); }
+      draw(true);
+    });
+    i.addEventListener("blur", () => { if (!drawing && !i.value.trim()) { adding = null; draw(); } });
+    return i;
+  };
+
+  const draw = (focus) => {
+    drawing = true;
+    const needle = q.trim().toLowerCase();
+    const hit = (t) => !needle || `${t.title} ${t.milestone || ""}`.toLowerCase().includes(needle);
+    let box;
+    board.replaceChildren(...COLS.map(([st, label]) => {
+      const all = tasks.filter((t) => t.status === st).sort(byPos), items = all.filter(hit);
+      if (adding === st) box = addBox(st);
+      return h("section", { class: "col s-" + st, "data-st": st },
+        h("h3", {}, h("i", { class: "dot" }), label, h("span", { class: "count" }, needle ? `${items.length}/${all.length}` : all.length)),
+        h("div", { class: "cards", "data-st": st }, items.map(card)),
+        edit && (adding === st ? box : h("button", { class: "btn link addbtn", onclick: () => { adding = st; draw(true); } }, "+ Add task")));
+    }));
+    drawing = false;
+    if (focus && box) box.focus();
+  };
+
+  const search = h("input", { class: "search", type: "search", placeholder: "Filter tasks", "aria-label": "Filter tasks" });
+  search.addEventListener("input", () => { q = search.value; draw(); });
+  main.append(h("div", { class: "bar" }, h("h2", {}, "Board"), search), board);
+  draw();
 }
 
 // ---------- roadmap (gantt) ----------
