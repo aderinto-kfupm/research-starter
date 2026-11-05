@@ -28,7 +28,7 @@ const field = (label, input) => h("div", { class: "field" }, h("label", {}, labe
 
 // ---------- shell ----------
 const routes = { board: viewBoard, roadmap: viewRoadmap, log: viewLog, paper: viewPaper, people: viewPeople };
-let cur = null, timer = null;
+let cur = null, timer = null, dragging = false;
 
 async function render() {
   if (!pb.authStore.isValid) return viewLogin();
@@ -50,7 +50,7 @@ window.addEventListener("hashchange", render);
 
 // live refresh when somebody else edits (not while a dialog is open)
 function live() {
-  const kick = () => { clearTimeout(timer); timer = setTimeout(() => { if (!document.querySelector("dialog[open]") && /board|roadmap|log/.test(cur)) render(); }, 300); };
+  const kick = () => { clearTimeout(timer); timer = setTimeout(() => { if (!dragging && !document.querySelector("dialog[open]") && /board|roadmap|log/.test(cur)) render(); }, 300); };
   for (const c of ["tasks", "logs"]) pb.collection(c).subscribe("*", kick).catch(() => {});
 }
 
@@ -70,7 +70,7 @@ function viewLogin(otpId, email, msg) {
         }
         await pb.collection("users").authWithOTP(otpId, input.value.trim());
         live(); render();
-      } catch { err.textContent = otpId ? "That code did not work." : "Could not send a code. Try again."; }
+      } catch (x) { err.textContent = otpId ? "That code did not work." : x.status === 400 ? "This email is not a member of the research project." : "Could not send a code. Try again."; }
     },
   }, field(otpId ? "Code sent to " + email : "Email", input), h("button", { class: "btn primary" }, otpId ? "Sign in" : "Send code"), err,
     otpId && h("button", { type: "button", class: "btn link", onclick: () => viewLogin() }, "Use a different email"));
@@ -163,8 +163,8 @@ async function viewBoard(main) {
       const c = h("div", { class: "card", draggable: canEdit(), onclick: () => taskDialog(t) },
         t.title,
         (t.due || t.milestone) && h("div", { class: "meta" }, t.milestone && h("span", {}, t.milestone), t.due && h("span", { class: late ? "late" : "" }, "due " + fmt(t.due))));
-      c.addEventListener("dragstart", () => { dragId = t.id; c.classList.add("drag"); });
-      c.addEventListener("dragend", () => c.classList.remove("drag"));
+      c.addEventListener("dragstart", (e) => { dragId = t.id; dragging = true; e.dataTransfer.setData("text/plain", t.id); e.dataTransfer.effectAllowed = "move"; c.classList.add("drag"); });
+      c.addEventListener("dragend", () => { dragging = false; c.classList.remove("drag"); });
       c.addEventListener("dragover", (e) => e.preventDefault());
       c.addEventListener("drop", async (e) => { e.preventDefault(); e.stopPropagation(); if (dragId && dragId !== t.id) { await place(st, t.id); render(); } });
       col.append(c);
